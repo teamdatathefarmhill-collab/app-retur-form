@@ -26,6 +26,7 @@
     --gray-700: #374151;
     --gray-500: #6b7280;
     --gray-400: #9ca3af;
+    --gray-300: #d1d5db;
     --gray-200: #e5e7eb;
     --gray-100: #f3f4f6;
     --gray-50:  #f9fafb;
@@ -217,7 +218,7 @@
   .section-title { font-size: 14px; font-weight: 600; color: var(--gray-900); }
   .section-body { padding: 14px 16px; }
 
-  /* ── Select ── */
+  /* ── Custom Select ── */
   .custom-select {
     position: relative;
   }
@@ -247,6 +248,92 @@
     pointer-events: none;
   }
 
+  /* ── Searchable Outlet ── */
+  .outlet-search-wrap { position: relative; }
+  .outlet-search-input {
+    width: 100%;
+    background: var(--gray-50);
+    border: 1.5px solid var(--gray-200);
+    border-radius: var(--radius-sm);
+    padding: 10px 36px 10px 12px;
+    font-size: 14px;
+    font-family: 'DM Sans', sans-serif;
+    color: var(--gray-900);
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .outlet-search-input:focus { border-color: var(--green-400); background: var(--white); }
+  .outlet-search-input::placeholder { color: var(--gray-400); }
+  .outlet-search-icon {
+    position: absolute; right: 10px; top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    color: var(--gray-400);
+  }
+  .outlet-dropdown {
+    position: absolute; top: calc(100% + 4px); left: 0; right: 0;
+    background: var(--white);
+    border: 1.5px solid var(--gray-200);
+    border-radius: var(--radius-sm);
+    max-height: 220px;
+    overflow-y: auto;
+    z-index: 50;
+    box-shadow: var(--shadow-md);
+    display: none;
+  }
+  .outlet-dropdown.open { display: block; }
+  .outlet-option {
+    padding: 10px 12px;
+    font-size: 14px;
+    cursor: pointer;
+    border-bottom: 1px solid var(--gray-100);
+    transition: background 0.1s;
+    color: var(--gray-900);
+  }
+  .outlet-option:last-child { border-bottom: none; }
+  .outlet-option:hover, .outlet-option.focused { background: var(--green-50); color: var(--green-700); }
+  .outlet-option.no-result { color: var(--gray-400); cursor: default; }
+  .outlet-option.no-result:hover { background: none; }
+  .outlet-selected-chip {
+    display: inline-flex; align-items: center; gap: 5px;
+    background: var(--green-50);
+    border: 1px solid var(--green-100);
+    border-radius: 20px;
+    padding: 3px 10px;
+    font-size: 12px;
+    color: var(--green-700);
+    font-weight: 500;
+    margin-top: 8px;
+  }
+
+  /* ── Date dropdown ── */
+  .date-dropdown-wrap { position: relative; }
+  .date-dropdown-select {
+    width: 100%;
+    appearance: none;
+    background: var(--gray-50);
+    border: 1.5px solid var(--gray-200);
+    border-radius: var(--radius-sm);
+    padding: 10px 36px 10px 12px;
+    font-size: 14px;
+    font-family: 'DM Mono', monospace;
+    color: var(--gray-900);
+    cursor: pointer;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .date-dropdown-select:focus { border-color: var(--green-400); background: var(--white); }
+  .date-dropdown-wrap::after {
+    content: '';
+    position: absolute; right: 12px; top: 50%;
+    transform: translateY(-50%);
+    width: 0; height: 0;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 5px solid var(--gray-400);
+    pointer-events: none;
+  }
+
   /* ── Selected info chip ── */
   .info-chip {
     display: inline-flex; align-items: center; gap: 5px;
@@ -260,35 +347,6 @@
     margin-top: 8px;
   }
   .info-chip svg { width: 12px; height: 12px; }
-
-  /* ── Date list ── */
-  .date-scroll {
-    display: flex; gap: 8px;
-    overflow-x: auto;
-    padding-bottom: 4px;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-  }
-  .date-scroll::-webkit-scrollbar { display: none; }
-  .date-pill {
-    flex-shrink: 0;
-    padding: 7px 14px;
-    border-radius: 20px;
-    border: 1.5px solid var(--gray-200);
-    background: var(--white);
-    font-size: 13px;
-    font-family: 'DM Mono', monospace;
-    color: var(--gray-700);
-    cursor: pointer;
-    transition: all 0.15s;
-    white-space: nowrap;
-  }
-  .date-pill:hover { border-color: var(--green-400); }
-  .date-pill.selected {
-    background: var(--green-700);
-    border-color: var(--green-700);
-    color: var(--white);
-  }
 
   /* ── Invoice list ── */
   .inv-list { display: flex; flex-direction: column; gap: 6px; }
@@ -483,7 +541,7 @@
   .loading-overlay {
     position: fixed; inset: 0;
     background: rgba(255,255,255,0.85);
-    display: flex; flex-direction: column;
+    flex-direction: column;
     align-items: center; justify-content: center;
     z-index: 200;
     display: none;
@@ -608,22 +666,28 @@
     </div>
     <div class="content">
 
-      <!-- Step 1: Outlet -->
+      <!-- Step 1: Outlet — searchable -->
       <div class="section-card" id="card-outlet">
         <div class="section-header">
           <div class="step-badge" id="badge-outlet">1</div>
           <span class="section-title">Pilih Outlet</span>
         </div>
         <div class="section-body">
-          <div class="custom-select">
-            <select id="sel-outlet" onchange="onOutletChange()">
-              <option value="">-- Pilih outlet --</option>
-            </select>
+          <div class="outlet-search-wrap" id="outlet-wrap">
+            <input type="text" class="outlet-search-input" id="outlet-search"
+              placeholder="Ketik nama outlet..."
+              autocomplete="off"
+              oninput="onOutletSearch(this.value)"
+              onfocus="openOutletDropdown()"
+              onkeydown="onOutletKeydown(event)">
+            <svg class="outlet-search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <div class="outlet-dropdown" id="outlet-dropdown"></div>
           </div>
+          <div id="outlet-chip"></div>
         </div>
       </div>
 
-      <!-- Step 2: Tanggal Invoice -->
+      <!-- Step 2: Tanggal Invoice — dropdown -->
       <div class="section-card disabled" id="card-tanggal">
         <div class="section-header">
           <div class="step-badge disabled" id="badge-tanggal">2</div>
@@ -631,7 +695,11 @@
         </div>
         <div class="section-body">
           <p class="helper-text" style="margin-bottom:10px">Pilih tanggal pengiriman invoice</p>
-          <div class="date-scroll" id="date-scroll"></div>
+          <div class="date-dropdown-wrap">
+            <select class="date-dropdown-select" id="date-select" onchange="onDateDropdownChange(this.value)">
+              <option value="">-- Pilih tanggal --</option>
+            </select>
+          </div>
         </div>
       </div>
 
@@ -776,30 +844,38 @@
 // ══════════════════════════════════════════════════════════════
 const GAS_URL = 'https://script.google.com/macros/s/AKfycbwa2dIv2h6745bC4l6KMLJbrwfflM2_un_QdlA0kos_IsJTh7WClc2UBndS0bsn2w/exec';
 
+// Google Drive folder untuk upload bukti
+const DRIVE_FOLDER_ID = '1dGdp8M2sFCx6JTxMbu-Oo0tlz1ha3WXE';
+
 // ══════════════════════════════════════════════════════════════
 // STATE
 // ══════════════════════════════════════════════════════════════
 let currentUser = null;
-let refData = [];        // semua baris dari sheet
-let outlets = [];        // daftar outlet milik user
+let refData = [];
+let outlets = [];
 let selectedOutlet = '';
 let selectedDate = '';
 let selectedInvoiceNo = '';
-let varianRows = [];     // [{code, trueName}]
+let varianRows = [];
 let uploadedFiles = [];
 let riwayatData = [];
+
+// Outlet search state
+let outletFocusIndex = -1;
+let filteredOutlets = [];
 
 // ══════════════════════════════════════════════════════════════
 // UTILS
 // ══════════════════════════════════════════════════════════════
-function showLoading(text='Memuat data...') {
-  document.getElementById('loading-overlay').style.display = 'flex';
+function showLoading(text = 'Memuat data...') {
+  const el = document.getElementById('loading-overlay');
+  el.style.display = 'flex';
   document.getElementById('loading-text').textContent = text;
 }
 function hideLoading() {
   document.getElementById('loading-overlay').style.display = 'none';
 }
-function showToast(msg, type='', duration=3000) {
+function showToast(msg, type = '', duration = 3000) {
   const t = document.getElementById('toast');
   t.textContent = msg;
   t.className = 'toast show ' + type;
@@ -813,25 +889,57 @@ function formatDate(d) {
   return `${parseInt(parts[2])} ${months[parseInt(parts[1])-1]} ${parts[0]}`;
 }
 function getInitials(name) {
-  return name.split(' ').slice(0,2).map(w=>w[0]).join('').toUpperCase();
+  return name.split(' ').slice(0,2).map(w => w[0]).join('').toUpperCase();
 }
 function enableCard(cardId, badgeId, stepNum) {
   const card = document.getElementById(cardId);
   const badge = document.getElementById(badgeId);
   card.classList.remove('disabled');
   badge.classList.remove('disabled');
-  badge.textContent = stepNum || badge.textContent;
+  if (stepNum !== undefined) badge.textContent = stepNum;
 }
 function disableCardsFrom(cardId) {
-  const cards = ['card-tanggal','card-invoice','card-varian','card-ket','card-upload','card-summary'];
+  const cards  = ['card-tanggal','card-invoice','card-varian','card-ket','card-upload','card-summary'];
   const badges = ['badge-tanggal','badge-invoice','badge-varian','badge-ket','badge-upload','badge-summary'];
-  const steps = [2,3,4,5,6,'✓'];
+  const steps  = [2,3,4,5,6,'✓'];
   const idx = cards.indexOf(cardId);
   for (let i = idx; i < cards.length; i++) {
     document.getElementById(cards[i]).classList.add('disabled');
     const b = document.getElementById(badges[i]);
     b.classList.add('disabled');
     b.textContent = steps[i];
+  }
+}
+
+// ══════════════════════════════════════════════════════════════
+// GAS CALL — fix CORS dengan mode no-cors tidak bisa return data.
+// Solusi: gunakan fetch dengan redirect follow (sudah benar),
+// pastikan GAS di-deploy sebagai "Anyone" tanpa auth.
+// Untuk upload file yg besar, kita kirim via callGAS biasa.
+// ══════════════════════════════════════════════════════════════
+async function callGAS(payload) {
+  // FIX: tambahkan folder id ke payload upload jika belum ada
+  if (payload.action === 'uploadFile' && !payload.folderId) {
+    payload.folderId = DRIVE_FOLDER_ID;
+  }
+
+  const url = GAS_URL + '?payload=' + encodeURIComponent(JSON.stringify(payload));
+  // GAS doGet harus di-deploy "Execute as: Me" + "Who has access: Anyone"
+  // fetch dengan redirect follow sudah cukup — CORS error biasanya terjadi
+  // karena deployment belum benar atau masih pakai "Anyone with Google account"
+  const resp = await fetch(url, {
+    method: 'GET',
+    redirect: 'follow',
+    // mode: 'no-cors' tidak bisa dipakai karena response tidak terbaca
+  });
+  if (!resp.ok) throw new Error('HTTP ' + resp.status);
+  const text = await resp.text();
+  // GAS kadang return teks kosong atau HTML jika ada redirect login
+  try {
+    return JSON.parse(text);
+  } catch(e) {
+    console.error('GAS response bukan JSON:', text.slice(0, 300));
+    throw new Error('Response bukan JSON. Pastikan GAS di-deploy dengan akses "Anyone".');
   }
 }
 
@@ -863,7 +971,7 @@ async function doLogin() {
       errEl.classList.add('show');
     }
   } catch(e) {
-    errEl.textContent = 'Gagal terhubung ke server. Coba lagi.';
+    errEl.textContent = 'Gagal terhubung ke server: ' + e.message;
     errEl.classList.add('show');
   } finally {
     hideLoading();
@@ -877,6 +985,7 @@ function doLogout() {
   document.getElementById('login-password').value = '';
   document.getElementById('app-screen').style.display = 'none';
   document.getElementById('login-screen').style.display = 'flex';
+  resetOutletSearch();
 }
 
 function setupUserUI(name) {
@@ -890,7 +999,6 @@ function setupUserUI(name) {
   document.getElementById('today-label').textContent = 'Hari ini: ' + formatDate(today.toISOString().slice(0,10));
 }
 
-// Enter key on login
 document.getElementById('login-password').addEventListener('keydown', e => {
   if (e.key === 'Enter') doLogin();
 });
@@ -905,81 +1013,158 @@ async function loadRefData() {
     if (res.status === 'ok') {
       refData = res.data || [];
       outlets = [...new Set(refData.map(r => r.customer))].sort();
-      populateOutlets();
       riwayatData = res.riwayat || [];
       renderRiwayat();
     } else {
       showToast('Gagal memuat data: ' + (res.message||''), 'error');
     }
   } catch(e) {
-    showToast('Error koneksi. Refresh halaman.', 'error');
+    showToast('Error koneksi: ' + e.message, 'error');
   } finally {
     hideLoading();
   }
 }
 
-function populateOutlets() {
-  const sel = document.getElementById('sel-outlet');
-  sel.innerHTML = '<option value="">-- Pilih outlet --</option>';
-  outlets.forEach(o => {
-    const opt = document.createElement('option');
-    opt.value = o; opt.textContent = o;
-    sel.appendChild(opt);
-  });
+// ══════════════════════════════════════════════════════════════
+// STEP 1: OUTLET — Searchable
+// ══════════════════════════════════════════════════════════════
+function openOutletDropdown() {
+  const q = document.getElementById('outlet-search').value;
+  renderOutletOptions(q);
+  document.getElementById('outlet-dropdown').classList.add('open');
 }
 
-// ══════════════════════════════════════════════════════════════
-// STEP 1: OUTLET
-// ══════════════════════════════════════════════════════════════
-function onOutletChange() {
-  selectedOutlet = document.getElementById('sel-outlet').value;
-  disableCardsFrom('card-tanggal');
-  document.getElementById('date-scroll').innerHTML = '';
-  document.getElementById('inv-list').innerHTML = '';
-  document.getElementById('varian-tbody').innerHTML = '';
-  selectedDate = ''; selectedInvoiceNo = ''; varianRows = [];
+function closeOutletDropdown() {
+  setTimeout(() => {
+    document.getElementById('outlet-dropdown').classList.remove('open');
+    outletFocusIndex = -1;
+  }, 150);
+}
 
-  if (!selectedOutlet) return;
+function onOutletSearch(q) {
+  renderOutletOptions(q);
+  document.getElementById('outlet-dropdown').classList.add('open');
+  outletFocusIndex = -1;
+  // Jika user menghapus/mengedit, reset pilihan
+  if (selectedOutlet && q !== selectedOutlet) {
+    selectedOutlet = '';
+    document.getElementById('outlet-chip').innerHTML = '';
+    disableCardsFrom('card-tanggal');
+    resetDateAndBelow();
+  }
+}
 
-  // Ambil tanggal unik dari outlet ini
+function renderOutletOptions(q) {
+  const dd = document.getElementById('outlet-dropdown');
+  const query = q.toLowerCase().trim();
+  filteredOutlets = query
+    ? outlets.filter(o => o.toLowerCase().includes(query))
+    : outlets;
+
+  if (!filteredOutlets.length) {
+    dd.innerHTML = '<div class="outlet-option no-result">Tidak ditemukan</div>';
+    return;
+  }
+  dd.innerHTML = filteredOutlets.map((o, i) =>
+    `<div class="outlet-option" data-idx="${i}" onmousedown="selectOutlet('${o.replace(/'/g,"\\'")}')">
+      ${o}
+    </div>`
+  ).join('');
+}
+
+function onOutletKeydown(e) {
+  const dd = document.getElementById('outlet-dropdown');
+  const items = dd.querySelectorAll('.outlet-option:not(.no-result)');
+  if (!items.length) return;
+  if (e.key === 'ArrowDown') {
+    e.preventDefault();
+    outletFocusIndex = Math.min(outletFocusIndex + 1, items.length - 1);
+    items.forEach((el, i) => el.classList.toggle('focused', i === outletFocusIndex));
+    items[outletFocusIndex]?.scrollIntoView({ block: 'nearest' });
+  } else if (e.key === 'ArrowUp') {
+    e.preventDefault();
+    outletFocusIndex = Math.max(outletFocusIndex - 1, 0);
+    items.forEach((el, i) => el.classList.toggle('focused', i === outletFocusIndex));
+    items[outletFocusIndex]?.scrollIntoView({ block: 'nearest' });
+  } else if (e.key === 'Enter' && outletFocusIndex >= 0) {
+    e.preventDefault();
+    selectOutlet(filteredOutlets[outletFocusIndex]);
+  } else if (e.key === 'Escape') {
+    closeOutletDropdown();
+  }
+}
+
+function selectOutlet(name) {
+  selectedOutlet = name;
+  document.getElementById('outlet-search').value = name;
+  document.getElementById('outlet-dropdown').classList.remove('open');
+  document.getElementById('outlet-chip').innerHTML =
+    `<div class="outlet-selected-chip">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+      ${name}
+    </div>`;
+
+  resetDateAndBelow();
+  // Ambil tanggal unik untuk outlet ini
   const rows = refData.filter(r => r.customer === selectedOutlet);
   const dates = [...new Set(rows.map(r => r.tanggal))].sort((a,b) => b.localeCompare(a));
-  renderDatePills(dates);
+  renderDateDropdown(dates);
   enableCard('card-tanggal', 'badge-tanggal', 2);
 }
 
-// ══════════════════════════════════════════════════════════════
-// STEP 2: TANGGAL
-// ══════════════════════════════════════════════════════════════
-function renderDatePills(dates) {
-  const container = document.getElementById('date-scroll');
-  container.innerHTML = '';
-  if (!dates.length) {
-    container.innerHTML = '<p style="font-size:13px;color:var(--gray-400)">Tidak ada invoice untuk outlet ini.</p>';
-    return;
-  }
-  dates.forEach(d => {
-    const pill = document.createElement('div');
-    pill.className = 'date-pill';
-    pill.textContent = formatDate(d);
-    pill.dataset.date = d;
-    pill.onclick = () => onDateSelect(d, pill);
-    container.appendChild(pill);
-  });
+function resetOutletSearch() {
+  selectedOutlet = '';
+  document.getElementById('outlet-search').value = '';
+  document.getElementById('outlet-chip').innerHTML = '';
+  document.getElementById('outlet-dropdown').classList.remove('open');
+  resetDateAndBelow();
 }
 
-function onDateSelect(date, el) {
-  selectedDate = date;
-  document.querySelectorAll('.date-pill').forEach(p => p.classList.remove('selected'));
-  el.classList.add('selected');
+function resetDateAndBelow() {
+  selectedDate = ''; selectedInvoiceNo = ''; varianRows = [];
+  const dateSelect = document.getElementById('date-select');
+  dateSelect.innerHTML = '<option value="">-- Pilih tanggal --</option>';
+  document.getElementById('inv-list').innerHTML = '';
+  document.getElementById('varian-tbody').innerHTML = '';
+  disableCardsFrom('card-tanggal');
+}
 
-  // Ambil invoice untuk outlet + tanggal ini
+// Close dropdown when clicking outside
+document.addEventListener('click', function(e) {
+  const wrap = document.getElementById('outlet-wrap');
+  if (wrap && !wrap.contains(e.target)) {
+    document.getElementById('outlet-dropdown').classList.remove('open');
+  }
+});
+
+// ══════════════════════════════════════════════════════════════
+// STEP 2: TANGGAL — dropdown select
+// ══════════════════════════════════════════════════════════════
+function renderDateDropdown(dates) {
+  const sel = document.getElementById('date-select');
+  sel.innerHTML = '<option value="">-- Pilih tanggal --</option>';
+  dates.forEach(d => {
+    const opt = document.createElement('option');
+    opt.value = d;
+    opt.textContent = formatDate(d);
+    sel.appendChild(opt);
+  });
+  sel.value = '';
+}
+
+function onDateDropdownChange(dateVal) {
+  selectedDate = dateVal;
+  disableCardsFrom('card-invoice');
+  document.getElementById('inv-list').innerHTML = '';
+  document.getElementById('varian-tbody').innerHTML = '';
+  selectedInvoiceNo = ''; varianRows = [];
+
+  if (!dateVal) return;
+
   const rows = refData.filter(r => r.customer === selectedOutlet && r.tanggal === selectedDate);
   const invoices = [...new Set(rows.map(r => r.noInvoice))].sort();
   renderInvoiceList(invoices);
-  disableCardsFrom('card-invoice');
   enableCard('card-invoice', 'badge-invoice', 3);
-  selectedInvoiceNo = ''; varianRows = [];
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -991,10 +1176,7 @@ function renderInvoiceList(invoices) {
   invoices.forEach(inv => {
     const item = document.createElement('div');
     item.className = 'inv-item';
-    item.innerHTML = `
-      <div class="inv-dot"></div>
-      <div class="inv-code">${inv}</div>
-    `;
+    item.innerHTML = `<div class="inv-dot"></div><div class="inv-code">${inv}</div>`;
     item.onclick = () => onInvoiceSelect(inv, item);
     list.appendChild(item);
   });
@@ -1005,7 +1187,6 @@ function onInvoiceSelect(inv, el) {
   document.querySelectorAll('.inv-item').forEach(i => i.classList.remove('selected'));
   el.classList.add('selected');
 
-  // Ambil varian dari invoice ini
   const rows = refData.filter(r => r.noInvoice === inv);
   varianRows = rows.map(r => ({ code: r.code, trueName: r.trueName }));
   renderVarianTable(varianRows);
@@ -1024,6 +1205,7 @@ function renderVarianTable(varianList) {
   const tbody = document.getElementById('varian-tbody');
   tbody.innerHTML = '';
   varianList.forEach(v => {
+    const safeCode = v.code.replace(/'/g, "\\'");
     const tr = document.createElement('tr');
     tr.className = 'varian-row';
     tr.innerHTML = `
@@ -1033,10 +1215,10 @@ function renderVarianTable(varianList) {
       </td>
       <td>
         <div class="qty-cell">
-          <button class="qty-btn" onclick="changeQty('${v.code}', -1)">−</button>
+          <button class="qty-btn" onclick="changeQty('${safeCode}', -1)">−</button>
           <input class="qty-input-sm" type="number" id="qty-${v.code}" value="" min="0" step="0.01"
-            placeholder="0" oninput="onQtyInput('${v.code}', this)" onchange="onQtyInput('${v.code}', this)">
-          <button class="qty-btn" onclick="changeQty('${v.code}', 1)">+</button>
+            placeholder="0" oninput="onQtyInput('${safeCode}', this)" onchange="onQtyInput('${safeCode}', this)">
+          <button class="qty-btn" onclick="changeQty('${safeCode}', 1)">+</button>
         </div>
       </td>
     `;
@@ -1127,7 +1309,6 @@ function updateSummary() {
   document.getElementById('btn-submit').disabled = !hasQty;
 }
 
-// Sync summary saat keterangan diubah
 document.getElementById('ket-input')?.addEventListener('input', updateSummary);
 
 // ══════════════════════════════════════════════════════════════
@@ -1161,12 +1342,14 @@ async function doSubmit() {
           action: 'uploadFile',
           filename: f.name,
           mimetype: f.type,
-          data: base64
+          data: base64,
+          folderId: DRIVE_FOLDER_ID
         });
         if (res.status === 'ok') buktiUrls.push(res.url);
+        else showToast('Upload gagal: ' + (res.message||''), 'error');
       }
     } catch(e) {
-      showToast('Gagal upload file. Coba lagi.', 'error');
+      showToast('Gagal upload file: ' + e.message, 'error');
       hideLoading();
       return;
     }
@@ -1188,14 +1371,13 @@ async function doSubmit() {
     if (res.status === 'ok') {
       showToast('✓ Retur berhasil disimpan!', 'success', 3500);
       resetForm();
-      // Reload riwayat
       await loadRefData();
       switchTab('riwayat');
     } else {
       showToast('Gagal simpan: ' + (res.message||''), 'error');
     }
   } catch(e) {
-    showToast('Error. Coba lagi.', 'error');
+    showToast('Error: ' + e.message, 'error');
   } finally {
     hideLoading();
   }
@@ -1211,8 +1393,8 @@ function fileToBase64(file) {
 }
 
 function resetForm() {
-  document.getElementById('sel-outlet').value = '';
-  document.getElementById('date-scroll').innerHTML = '';
+  resetOutletSearch();
+  document.getElementById('date-select').innerHTML = '<option value="">-- Pilih tanggal --</option>';
   document.getElementById('inv-list').innerHTML = '';
   document.getElementById('varian-tbody').innerHTML = '';
   document.getElementById('ket-input').value = '';
@@ -1257,16 +1439,6 @@ function switchTab(tab) {
     document.getElementById('tab-'+t).classList.toggle('active', t===tab);
     document.getElementById('nav-'+t).classList.toggle('active', t===tab);
   });
-}
-
-// ══════════════════════════════════════════════════════════════
-// GAS CALL
-// ══════════════════════════════════════════════════════════════
-async function callGAS(payload) {
-  const url = GAS_URL + '?payload=' + encodeURIComponent(JSON.stringify(payload));
-  const resp = await fetch(url, { method: 'GET', redirect: 'follow' });
-  if (!resp.ok) throw new Error('HTTP ' + resp.status);
-  return await resp.json();
 }
 
 // ══════════════════════════════════════════════════════════════

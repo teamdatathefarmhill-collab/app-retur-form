@@ -918,23 +918,28 @@ function disableCardsFrom(cardId) {
 // Untuk upload file yg besar, kita kirim via callGAS biasa.
 // ══════════════════════════════════════════════════════════════
 async function callGAS(payload) {
-  // FIX: tambahkan folder id ke payload upload jika belum ada
   if (payload.action === 'uploadFile' && !payload.folderId) {
     payload.folderId = DRIVE_FOLDER_ID;
   }
 
-  const url = GAS_URL + '?payload=' + encodeURIComponent(JSON.stringify(payload));
-  // GAS doGet harus di-deploy "Execute as: Me" + "Who has access: Anyone"
-  // fetch dengan redirect follow sudah cukup — CORS error biasanya terjadi
-  // karena deployment belum benar atau masih pakai "Anyone with Google account"
-  const resp = await fetch(url, {
-    method: 'GET',
-    redirect: 'follow',
-    // mode: 'no-cors' tidak bisa dipakai karena response tidak terbaca
-  });
+  // Upload file & submit retur pakai POST (body besar tidak bisa lewat GET)
+  const usePost = payload.action === 'uploadFile' || payload.action === 'submitRetur';
+
+  let resp;
+  if (usePost) {
+    resp = await fetch(GAS_URL, {
+      method: 'POST',
+      redirect: 'follow',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify(payload)
+    });
+  } else {
+    const url = GAS_URL + '?payload=' + encodeURIComponent(JSON.stringify(payload));
+    resp = await fetch(url, { method: 'GET', redirect: 'follow' });
+  }
+
   if (!resp.ok) throw new Error('HTTP ' + resp.status);
   const text = await resp.text();
-  // GAS kadang return teks kosong atau HTML jika ada redirect login
   try {
     return JSON.parse(text);
   } catch(e) {

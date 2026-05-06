@@ -198,7 +198,7 @@
     background: var(--white);
     border-radius: var(--radius-md);
     border: 1px solid var(--gray-200);
-    overflow: hidden;
+    overflow: visible;
     margin-bottom: 12px;
   }
   .section-header {
@@ -922,7 +922,7 @@ async function callGAS(payload) {
     payload.folderId = DRIVE_FOLDER_ID;
   }
 
-  // Upload file & submit retur pakai POST (body besar tidak bisa lewat GET)
+  // Upload file & submit retur pakai POST — payload besar tidak bisa lewat GET
   const usePost = payload.action === 'uploadFile' || payload.action === 'submitRetur';
 
   let resp;
